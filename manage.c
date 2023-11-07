@@ -11,43 +11,50 @@ typedef struct{
     float price;
 }Pharmacy;
 
-void displayEnteredProducts(Pharmacy p){
-    printf("\n\t\t\tProduct Name: %s", p.name);
-    printf("\n\t\t\tProduct Code: %d", p.code);
-    printf("\n\t\t\tProduct Amount:  [%d]", p.amount);
-    printf("\n\t\t\tProduct Price: %.2f", p.price);
-    printf("\n\t\t\t=============================\n");
+void displayinput_products(Pharmacy p){
+   
+    printf("\n\n\t\tProduct Name: %s", p.name);
+    printf("\n\t\tProduct Code: %d", p.code);
+    printf("\n\t\tProduct Amount:  [%d]", p.amount);
+    printf("\n\t\tProduct Price: %.2f", p.price);
 };
 
 void displayCompanyName(){
-    printf("\n\t\t----------EKKY PHARMCARE LTD----------\n");
+    printf("\n\t\t===============EKKY PHARMCARE LTD=================");
 };
 void displayOptions(){
-    printf("\n\tWELCOME TO EKKY PHARMCARE MANAGEMENT SYSTEM\n");
     printf("\n\t\t\t1. Add Product");
     printf("\n\t\t\t2. Update Product Details");
     printf("\n\t\t\t3. Delete Product");
     printf("\n\t\t\t4. Exit\n");
 }
+void displayBorderLine(){
+    printf("\n\t\t==============================================");
+}
 
 int main()
 {
     Pharmacy product;
-    Pharmacy EnteredProducts[MAX];
+    Pharmacy edit_product;
+
+    Pharmacy input_products[MAX];
+    Pharmacy edit_input_products[MAX];
+
     int productCount = 0;
+    int editCount = 0;
 
     while(1){
+        displayCompanyName();
         displayOptions();
         int choice;
-        printf("\n\t\tEnter your choice(1,2,3 or 4): ");
+        printf("\n\t\t     Enter your choice(1,2,3 or 4): ");
         scanf("%d", &choice);        
 
         switch (choice)
         {
         case 1:
             //Add Product
-        displayCompanyName();
-        printf("\n\n\t\t\t----ENTER PRODUCT DETAILS----");
+        printf("\n\t\t===========ENTER PRODUCT DETAILS=============");
         printf("\n\t\t\tProduct Name: ");
         scanf(" %[^\n]s", product.name);
 
@@ -60,31 +67,48 @@ int main()
         printf("\n\t\t\tProduct Price: ");
         scanf("%f", &product.price);
 
+        // Write to file
         FILE *fp;
         fp = fopen("product.csv", "a");
         //add header line
         //fprintf(fp, "Name, Code, Amount, Price\n");
         fprintf(fp, "%s, %d, %d, %.2f\n", product.name, product.code, product.amount, product.price);
-        fclose(fp);
-        displayEnteredProducts(product);
+        displayBorderLine();
 
-        EnteredProducts[productCount] = product;
+        if(ferror(fp)){
+            printf("\n\t\t\tERROR adding product to system.");
+            return 1;
+        }else{
+            printf("\n\t\t\tPRODUCT ADDED THE SYST|E|M.");
+        }
+        displayBorderLine();
+        fclose(fp);
+        
+        input_products[productCount] = product;
         productCount++;
 
         char next;
-        printf("\n\t\t\tDo you want to add another product? (y/n): ");
-        scanf("%s", &next);
+        printf("\n\n\t\tDo you want to add another product? (y/n): ");
+        scanf(" %s", &next);
 
         if(next == 'N' || next == 'n'){
             for(int i = 0; i < productCount; i++){
-                printf("\n\n\t\t\t=====ENTERED PRODUCTS (%d)=====\n"), i+1;
-                displayEnteredProducts(product);    
+                printf("\n\n\t\t============= INPUT PRODUCT =============");
+                displayinput_products(input_products[i]);    
             }
+            displayBorderLine();
+            printf("\n\t\tTotal number of inputs: %d", productCount);
+            displayBorderLine();
             return 0;
         }
             break;
         case 2:
-            //Update Product Details
+            //Edit Product Details
+            //Write a program to edit product details in the file
+            printf("\n\t\t===========EDIT PRODUCT DETAILS=============");
+            printf("\n\t\t\tEnter Product Code to search : ");
+            scanf(" %d", edit_product.code);
+
             break;
         case 3:
             //Delete Product
