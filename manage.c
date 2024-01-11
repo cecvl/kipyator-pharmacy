@@ -26,6 +26,12 @@ void displayOptions() {
     printf("\n\t\t\t4. Delete Product");
     printf("\n\t\t\t5. Exit\n");
 }
+void displayDeleteOptions(Pharmacy deleteproduct) {  
+        printf("\n\t\t\t***** Actions Available: *****");
+        printf("\n\t\t\t\t1. Delete Product[%d]", deleteproduct.code);
+        printf("\n\t\t\t\t2. Exit");
+        printf("\n\t\t\tEnter your choice(1 or 2): ");
+}
 void displayBorderLine() {
     printf("\n\t\t==============================================");
 }
@@ -37,8 +43,12 @@ void initializeProduct(Pharmacy* searchproduct) {
     searchproduct->price = 0.0;
 }
 
+/* Search function returns an array of products(structs)
+ that match the given code */
 Pharmacy* findProductbyCode(const char* filename, int p_code, int* numMatches) {
     Pharmacy* foundProducts = malloc(MAX * sizeof(Pharmacy));
+    /*Allocates dynamic memory
+     to store an array of Pharmacy structs*/
 
     FILE* fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -47,10 +57,9 @@ Pharmacy* findProductbyCode(const char* filename, int p_code, int* numMatches) {
         return foundProducts;
     }
 
-    char buffer[100];
+    char buffer[100]; //stores each line of the file
     Pharmacy s_product;
     *numMatches = 0;
-
     while (fgets(buffer, sizeof(buffer), fp)) {
         initializeProduct(&s_product);
         sscanf(buffer, "%[^,], %d, %d, %f", s_product.name, &s_product.code, &s_product.amount, &s_product.price);
@@ -69,9 +78,6 @@ int main() {
     Pharmacy input_products[MAX];
     int productCount = 0;
 
-    //Pharmacy edit_input_products[MAX];
-    //Pharmacy search_product;
-
     while (1) {
         displayCompanyName();
         displayOptions();
@@ -83,11 +89,22 @@ int main() {
         case 1:
             // Add Product
             printf("\n\t\t===========ENTER PRODUCT DETAILS=============");
+            int codetoinput;
+            printf("\n\t\t\tEnter Product Code: ");
+            scanf("%d", &codetoinput);
+
+            //check if product code already exists in file
+            int codeMatches;
+            Pharmacy* available_products = findProductbyCode("product.csv", codetoinput, &codeMatches);
+
+            if(codeMatches > 0){
+                printf("\n\t\t\tProduct with code: [%d] already exists.\n\t\t\tPlease use a new code.", codetoinput);
+                displayBorderLine();
+            }else {
             printf("\n\t\t\tProduct Name: ");
             scanf(" %[^\n]s", product.name);
 
-            printf("\n\t\t\tProduct Code: ");
-            scanf("%d", &product.code);
+            product.code = codetoinput;
 
             printf("\n\t\t\tProduct Amount: ");
             scanf("%d", &product.amount);
@@ -107,10 +124,10 @@ int main() {
             } else {
                 printf("\n\t\t\tPRODUCT ADDED TO THE SYSTEM.");
             }
-
             displayBorderLine();
             fclose(fp);
 
+            // Add product to input_products array
             input_products[productCount] = product;
             productCount++;
 
@@ -128,120 +145,128 @@ int main() {
                 displayBorderLine();
                 return 0;
             }
+            }
+            // Free dynamic memory from findProductbyCode()
+            free(available_products);    
             break;
 
         case 2:
             // Search Product
             printf("\n\t\t===========SEARCH PRODUCT=============");
-            printf("\n\t\tEnter Product Code to search : ");
+            printf("\n\t\tEnter Product Code to Search : ");
             int codetosearch;
             scanf("%d", &codetosearch);
 
-            // initialize search product
+            // Search for product
             int searchMatches;
             Pharmacy* found_products = findProductbyCode("product.csv", codetosearch, &searchMatches);
-
             displayBorderLine();
+
             if (searchMatches == 0) {
                 printf("\n\t\t\tNO PRODUCT FOUND with code: [%d]", codetosearch);
                 displayBorderLine();
             } else {
-                printf("\n\t\t\tProducts Found (%d)", searchMatches);
+                printf("\n\t\t\tProduct Found [(%d)]", searchMatches);
                 displayBorderLine();
                 for (int i = 0; i < searchMatches; i++) {
                     displayproduct(found_products[i]);
                     displayBorderLine();
                 }
             }
-
-            // Free the allocated memory for found_products
             free(found_products);
             break;
 
         case 3:
             // Edit Product Details
-            printf("\n\t\t===========EDIT PRODUCT DETAILS=============");
+            printf("\n\t\t============EDIT PRODUCT DETAILS==============");
             int codetoedit;
-            printf("\n\t\t\tEnter Product Code to Edit : ");
+            printf("\n\t\t\tEnter code for Product to Edit : ");
             scanf("%d", &codetoedit);
             // Add code for editing product details here
             break;
 
         case 4:
             // Delete Product
-            printf("\n\t\t===========DELETE PRODUCT=============");
+            printf("\n\t\t=============DELETE PRODUCT===============");
             printf("\n\t\tEnter Product Code to Delete : ");
             int codetodelete;
             scanf("%d", &codetodelete);
 
             int deleteMatches;
             Pharmacy* found_delete_products = findProductbyCode("product.csv", codetodelete, &deleteMatches);
-
             displayBorderLine();
+
             if (deleteMatches == 0) {
-                printf("\n\t\t\tNo product found with code: %d", codetodelete);
+                printf("\n\t\t\tNO PRODUCT found with code: [%d]", codetodelete);
                 displayBorderLine();
             } else {
-                printf("\n\t\t\tProducts Found (%d)", deleteMatches);
+                printf("\n\t\t\tProduct Found (%d)", deleteMatches);
                 for (int i = 0; i < deleteMatches; i++) {
                     displayproduct(found_delete_products[i]);
                     displayBorderLine();
                 }
             }
             displayBorderLine();
-            printf("\n\t\t***** Actions Available: *****");
-            printf("\n\t\t\t1. Delete Product");
-            printf("\n\t\t\t2. Exit");
-            printf("\n\t\tEnter your choice(1 or 2): ");
+
+            displayDeleteOptions(found_delete_products[0]);
             int delete_choice;
             scanf(" %d", &delete_choice);
 
             switch (delete_choice) {
                 case 1:
-                    // Delete product
+                    /*Create a temporary file to store all products
+                    except the one to be deleted
+                    */
                     FILE* write_fp = fopen("temp.csv", "w");
                     if (write_fp == NULL) {
-                        printf("\n\t\t\tERROR creating file.");
+                        printf("\n\t\t\tERROR creating temporary file.");
                         return 1;
                     }
 
                     FILE* read_fp = fopen("product.csv", "r");
                     if (read_fp == NULL) {
-                        printf("\n\t\t\tError opening file.");
+                        printf("\n\t\t\tError opening products file.");
                         fclose(write_fp);
                         return 1;
                     }
+
                     char buffer[100];
                     while(fgets(buffer, sizeof(buffer), read_fp)) {
-                        Pharmacy f_product;
-                        initializeProduct(&f_product);
-                        sscanf(buffer, "%[^,], %d, %d, %f", f_product.name, &f_product.code, &f_product.amount, &f_product.price);
+                        Pharmacy r_product; //remaining product
+                        initializeProduct(&r_product);
+                        sscanf(buffer, "%[^,], %d, %d, %f", r_product.name, &r_product.code, &r_product.amount, &r_product.price);
 
-                        if (f_product.code != codetodelete) {
-                            fprintf(write_fp, "%s, %d, %d, %.2f\n", f_product.name, f_product.code, f_product.amount, f_product.price);
+                        /*all products are written to temp.csv
+                        except the one to be deleted
+                        */
+                        if (r_product.code != codetodelete) {
+                            fprintf(write_fp, "%s, %d, %d, %.2f\n", r_product.name, r_product.code, r_product.amount, r_product.price);
                         }
                         
                     }
                     fclose(read_fp);
                     fclose(write_fp);
 
+                    /*delete the original file
+                     and rename the temporary file
+                    */
                     remove("product.csv");
-                    rename("temp.csv", "product.csv");
+                    rename("temp.csv", "product.csv"); 
 
                     displayBorderLine();
                     printf("\n\t\t\tProduct DELETED : %s [%d]", found_delete_products[0].name, found_delete_products[0].code);
                     displayBorderLine();
+                    free(found_delete_products);
                     break;
                 case 2:
                     // Exit
+                    free(found_delete_products);
                     displayBorderLine();
                     return 0;
                 default:
                     printf("\n\t\t\tInvalid choice. Enter a valid choice.");
                     break;        
             }
-
-            free(found_delete_products);
             break;
 
         case 5:
