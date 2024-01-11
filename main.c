@@ -6,6 +6,16 @@ float price, amt, total, cash, change;
 char next, ans;
 
  //BODY
+ /*display products
+    ask for code and amount
+    display total amount
+    ask if they want to buy another product
+    if yes, repeat
+    if no, ask for cash
+    display change
+    save code, amount sold & total cost to a file
+    deduct quantity from inventory
+ */
 int main()
    
 {
