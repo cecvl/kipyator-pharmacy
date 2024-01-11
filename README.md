@@ -7,6 +7,7 @@ This is a simple point-of-sale system for a pharmacy. It allows users to add, se
 ## Design
 
 **Main (main.c)**
+
 NOT YET COMPLETED.
 This is the main part of the program where sales will occur.
 Display available products.
@@ -17,15 +18,16 @@ Include file to store sales records.
 
 **Manage (manage.c)**
 
-1. **Add Product:** Add a new product to the inventory with details such as name, code, amount, and price.
+This is designed to be the management module.
+It has 4 main features:
+
+1. **Add Product:** Add a new product to the inventory with details: name, code, amount & price.
 
 2. **Search Product:** Search for a product by entering its code and display its details.
 
-3. **Update Product Details:** NOT YET COMPLETED. The intention of this feature is to edit details of a product in the inventory.
+3. **Update Product Details:** NOT YET COMPLETED. The intention of this feature is to edit specific details of a product in the inventory.
 
 4. **Delete Product:** Search for a product by its code then choose whether to delete it or not.
-
-5. **Exit:** Terminate the program.
 
 **File Handling**
 
